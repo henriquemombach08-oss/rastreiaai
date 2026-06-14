@@ -247,10 +247,10 @@ export default function RastreioPage({ params }: { params: Promise<{ token: stri
         <div className="bg-white border-t border-neutral-200 p-4 shadow-lg">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <div className="bg-neutral-900 rounded-lg p-1">
+              <div className="bg-orange-500 rounded-lg p-1">
                 <MapPin className="h-4 w-4 text-white" />
               </div>
-              <span className="font-bold text-sm">Rastreaí</span>
+              <span className="font-black text-sm">Rastreaí</span>
             </div>
             <div className="flex items-center gap-2">
               {posicao && conectado && (

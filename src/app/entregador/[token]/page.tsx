@@ -263,10 +263,10 @@ export default function EntregadorPage({ params }: { params: Promise<{ token: st
   if (estado === "aguardando") {
     return (
       <Tela>
-        <div className="bg-neutral-900 rounded-2xl p-5 mb-6">
+        <div className="bg-orange-500 rounded-2xl p-5 mb-6">
           <MapPin className="h-10 w-10 text-white" />
         </div>
-        <h2 className="text-xl font-bold text-neutral-800 text-center mb-1">Rastreaí</h2>
+        <h2 className="text-xl font-black text-neutral-800 text-center mb-1">Rastreaí</h2>
         <p className="text-neutral-500 text-sm text-center mb-6">Entregador</p>
 
         {entrega && (

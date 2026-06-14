@@ -14,10 +14,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <header className="bg-white border-b border-neutral-200 sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="bg-neutral-900 rounded-lg p-1.5">
+            <div className="bg-orange-500 rounded-lg p-1.5">
               <MapPin className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold tracking-tight">Rastreaí</span>
+            <span className="font-black tracking-tight">Rastreaí</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link

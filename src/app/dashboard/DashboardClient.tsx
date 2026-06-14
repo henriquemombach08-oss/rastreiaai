@@ -197,7 +197,7 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
             {ativas.length} entrega{ativas.length !== 1 ? "s" : ""} ativa{ativas.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button onClick={() => setShowForm(!showForm)} size="sm" className="gap-1">
+        <Button onClick={() => setShowForm(!showForm)} size="sm" variant="accent" className="gap-1">
           <Plus className="h-4 w-4" />
           Nova entrega
         </Button>
