@@ -252,9 +252,17 @@ export default function RastreioPage({ params }: { params: Promise<{ token: stri
               </div>
               <span className="font-bold text-sm">Rastreaí</span>
             </div>
-            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-              {statusLabel(entrega.status)}
-            </span>
+            <div className="flex items-center gap-2">
+              {posicao && conectado && (
+                <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                  ao vivo
+                </span>
+              )}
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                {statusLabel(entrega.status)}
+              </span>
+            </div>
           </div>
 
           <p className="text-sm font-medium text-neutral-800">{entrega.store_name}</p>

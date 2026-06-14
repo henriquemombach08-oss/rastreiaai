@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { Plus, Package, History } from "lucide-react"
+import { Plus, Package, History, Loader2, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { DeliveryCard } from "@/components/dashboard/DeliveryCard"
 import { NewDeliveryForm } from "@/components/dashboard/NewDeliveryForm"
 import { createClient } from "@/lib/supabase/client"
@@ -18,7 +19,12 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
   const [deliveries, setDeliveries] = useState<Delivery[]>(initialDeliveries)
   const [showForm, setShowForm] = useState(false)
   const [aba, setAba] = useState<"ativas" | "historico">("ativas")
+  const [storeName, setStoreName] = useState(store.name)
+  const [nomeEdit, setNomeEdit] = useState(store.name)
+  const [salvandoNome, setSalvandoNome] = useState(false)
   const supabase = createClient()
+
+  const isFirstSetup = storeName === "Minha Loja"
 
   const recarregar = useCallback(async () => {
     const { data } = await supabase
@@ -82,7 +88,6 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
           if (cancelado) return
           if (status === "SUBSCRIBED") {
             tentativa = 0
-            // sincroniza após reconectar, caso eventos tenham sido perdidos
             recarregar()
           } else if (
             status === "CHANNEL_ERROR" ||
@@ -111,6 +116,25 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
     }
   }, [supabase, store.id, recarregar])
 
+  async function salvarNomeRapido() {
+    const nome = nomeEdit.trim()
+    if (!nome || nome === storeName) return
+    setSalvandoNome(true)
+    try {
+      const res = await fetch("/api/stores", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: nome }),
+      })
+      if (res.ok) {
+        setStoreName(nome)
+        setNomeEdit(nome)
+      }
+    } finally {
+      setSalvandoNome(false)
+    }
+  }
+
   async function handleDispatch(id: string) {
     await fetch(`/api/deliveries/${id}/dispatch`, { method: "POST" })
     await recarregar()
@@ -134,11 +158,44 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
 
   return (
     <div className="space-y-6">
+      {/* Banner de configuração inicial */}
+      {isFirstSetup && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Pencil className="h-4 w-4 text-amber-700" />
+            <p className="text-sm font-medium text-amber-800">
+              Qual é o nome da sua loja?
+            </p>
+          </div>
+          <p className="text-xs text-amber-700">
+            Ele aparece no link de rastreamento que o cliente vê.
+          </p>
+          <div className="flex gap-2">
+            <Input
+              value={nomeEdit}
+              onChange={(e) => setNomeEdit(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && salvarNomeRapido()}
+              placeholder="Ex: Hambúrguer do Bairro"
+              className="flex-1 h-9 text-sm bg-white"
+            />
+            <Button
+              size="sm"
+              onClick={salvarNomeRapido}
+              disabled={salvandoNome || !nomeEdit.trim() || nomeEdit.trim() === storeName}
+            >
+              {salvandoNome ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Salvar"}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">{store.name}</h1>
-          <p className="text-sm text-neutral-500">{ativas.length} entrega{ativas.length !== 1 ? "s" : ""} ativa{ativas.length !== 1 ? "s" : ""}</p>
+          <h1 className="text-xl font-bold">{storeName}</h1>
+          <p className="text-sm text-neutral-500">
+            {ativas.length} entrega{ativas.length !== 1 ? "s" : ""} ativa{ativas.length !== 1 ? "s" : ""}
+          </p>
         </div>
         <Button onClick={() => setShowForm(!showForm)} size="sm" className="gap-1">
           <Plus className="h-4 w-4" />
