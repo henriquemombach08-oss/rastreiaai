@@ -1,10 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { MapPin, Clock, User, Truck, CheckCircle, Copy, Check, ChevronDown, ChevronUp } from "lucide-react"
+import { MapPin, Clock, User, Truck, CheckCircle, Copy, Check, ChevronDown, ChevronUp, Loader2 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn, statusLabel, statusColor, tempoDecorrido } from "@/lib/utils"
+import { useDeliveryLocation } from "@/lib/hooks/useDeliveryLocation"
 import type { Delivery } from "@/types/database"
 import dynamic from "next/dynamic"
 
@@ -51,7 +52,11 @@ export function DeliveryCard({ delivery, onDispatch, onComplete }: DeliveryCardP
     setLoadingAction(false)
   }
 
-  const isAtivo = delivery.status === "pending" || delivery.status === "dispatched" || delivery.status === "nearby"
+  const emTransito = delivery.status === "dispatched" || delivery.status === "nearby"
+  const isAtivo = delivery.status === "pending" || emTransito
+
+  // Só assina o Realtime quando o card está aberto e a entrega está em trânsito
+  const livePosition = useDeliveryLocation(delivery.id, expanded && emTransito)
 
   return (
     <Card className={cn("transition-all", !isAtivo && "opacity-60")}>
@@ -103,10 +108,18 @@ export function DeliveryCard({ delivery, onDispatch, onComplete }: DeliveryCardP
               />
             </div>
 
-            {/* Mapa miniatura — só quando em trânsito */}
-            {delivery.status === "dispatched" || delivery.status === "nearby" ? (
-              <div className="h-48 rounded-lg overflow-hidden border">
-                <DeliveryMap position={null} className="h-full w-full" />
+            {/* Mapa miniatura ao vivo — só quando em trânsito */}
+            {emTransito ? (
+              <div className="relative h-48 rounded-lg overflow-hidden border">
+                <DeliveryMap position={livePosition} className="h-full w-full" />
+                {!livePosition && (
+                  <div className="absolute inset-0 z-[500] flex items-center justify-center bg-white/80 pointer-events-none">
+                    <div className="text-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-neutral-400 mx-auto mb-1" />
+                      <p className="text-xs text-neutral-500">Aguardando posição do entregador...</p>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : null}
 

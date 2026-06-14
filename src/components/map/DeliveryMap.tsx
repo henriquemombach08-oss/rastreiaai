@@ -76,11 +76,12 @@ export default function DeliveryMap({ position, className }: DeliveryMapProps) {
       if (markerRef.current) {
         // Animação suave — sem teleporte
         animateMarker(markerRef.current, newLatLng)
+        map.panTo(newLatLng, { animate: true, duration: 0.8 })
       } else {
+        // Primeira posição: cria o marcador e dá zoom no entregador
         markerRef.current = L.marker(newLatLng).addTo(map)
+        map.setView(newLatLng, 16, { animate: true })
       }
-
-      map.panTo(newLatLng, { animate: true, duration: 0.8 })
     }
 
     updateMarker()
