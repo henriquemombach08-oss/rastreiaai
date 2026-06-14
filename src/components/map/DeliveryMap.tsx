@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
+import { getTileConfig } from "@/lib/map"
 
 interface Position {
   lat: number
@@ -43,9 +44,10 @@ export default function DeliveryMap({ position, className }: DeliveryMapProps) {
         zoomControl: true,
       })
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
+      const tiles = getTileConfig()
+      L.tileLayer(tiles.url, {
+        attribution: tiles.attribution,
+        maxZoom: tiles.maxZoom,
       }).addTo(map)
 
       if (position) {
