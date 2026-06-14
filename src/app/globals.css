@@ -8,6 +8,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand:      #B83A28;
+  --color-brand-dark: #9C3020;
+  --color-brand-mid:  #CC4530;
+  --color-brand-light: #F9EDE9;
+  --color-brand-muted: #F2DBD6;
 }
 
 body {

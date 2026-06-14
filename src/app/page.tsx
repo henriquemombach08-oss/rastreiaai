@@ -14,7 +14,7 @@ export default async function Home() {
       <nav className="sticky top-0 z-50 bg-[#F9F9F7]/90 backdrop-blur-md border-b border-neutral-200/60">
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-orange-500 rounded-lg p-1.5">
+            <div className="bg-brand rounded-lg p-1.5">
               <MapPin className="h-4 w-4 text-white" />
             </div>
             <span className="font-black tracking-tight text-neutral-950">Rastreaí</span>
@@ -28,7 +28,7 @@ export default async function Home() {
             </Link>
             <Link
               href="/login"
-              className="bg-orange-500 hover:bg-orange-600 text-white text-sm px-4 py-2 rounded-lg transition-colors font-semibold"
+              className="bg-brand hover:bg-brand-dark text-white text-sm px-4 py-2 rounded-lg transition-colors font-semibold"
             >
               Criar conta
             </Link>
@@ -40,14 +40,14 @@ export default async function Home() {
       <section className="max-w-6xl mx-auto px-5 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center pt-16 pb-24 lg:min-h-[calc(100vh-56px)]">
         {/* Left */}
         <div>
-          <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-100 text-orange-600 text-xs font-semibold px-3 py-1.5 rounded-full mb-10 uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 bg-brand-light border border-brand-muted text-brand text-xs font-semibold px-3 py-1.5 rounded-full mb-10 uppercase tracking-widest">
             Para entrega própria no iFood
           </div>
 
           <h1 className="text-[3rem] md:text-[4rem] lg:text-[4.25rem] font-black leading-[1.06] tracking-[-0.03em] mb-6">
             Seus clientes<br />
             param de<br />
-            <span className="text-orange-500">perguntar.</span>
+            <span className="text-brand">perguntar.</span>
           </h1>
 
           <p className="text-lg text-neutral-500 leading-relaxed mb-10 max-w-md">
@@ -58,7 +58,7 @@ export default async function Home() {
           <div className="flex items-center gap-5 mb-12">
             <Link
               href="/login"
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-7 py-3.5 rounded-xl transition-colors text-base"
+              className="bg-brand hover:bg-brand-dark text-white font-bold px-7 py-3.5 rounded-xl transition-colors text-base"
             >
               Começar grátis
             </Link>
@@ -89,7 +89,7 @@ export default async function Home() {
       {/* ── Como funciona ── */}
       <section className="bg-white border-y border-neutral-100">
         <div className="max-w-6xl mx-auto px-5 py-24">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-orange-500 mb-12">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand mb-12">
             Como funciona
           </p>
 
@@ -134,7 +134,7 @@ export default async function Home() {
           </div>
           <Link
             href="/login"
-            className="flex-shrink-0 bg-orange-500 hover:bg-orange-400 text-white font-bold px-8 py-4 rounded-xl transition-colors text-base"
+            className="flex-shrink-0 bg-brand hover:bg-brand-mid text-white font-bold px-8 py-4 rounded-xl transition-colors text-base"
           >
             Criar conta grátis →
           </Link>
@@ -145,7 +145,7 @@ export default async function Home() {
       <footer className="bg-neutral-950 border-t border-white/5 py-6">
         <div className="max-w-6xl mx-auto px-5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="bg-orange-500 rounded-md p-1">
+            <div className="bg-brand rounded-md p-1">
               <MapPin className="h-3 w-3 text-white" />
             </div>
             <span className="text-white/40 text-sm font-semibold">Rastreaí</span>
@@ -161,7 +161,7 @@ function PhoneMockup() {
   return (
     <div className="relative select-none">
       {/* Ambient glow */}
-      <div className="absolute inset-0 bg-orange-300/20 blur-3xl rounded-full scale-110 pointer-events-none" />
+      <div className="absolute inset-0 bg-brand/10 blur-3xl rounded-full scale-110 pointer-events-none" />
 
       {/* Phone body */}
       <div className="relative bg-neutral-950 w-[264px] h-[536px] rounded-[46px] p-[10px] shadow-2xl ring-1 ring-white/10">
@@ -209,7 +209,7 @@ function PhoneMockup() {
           >
             <path
               d="M 90 420 C 90 330 80 260 200 160"
-              stroke="#f97316"
+              stroke="#B83A28"
               strokeWidth="3"
               strokeLinecap="round"
               strokeDasharray="6 4"
@@ -228,8 +228,8 @@ function PhoneMockup() {
 
           {/* Courier — pulsing orange dot */}
           <div className="absolute" style={{ top: "73%", left: "30%" }}>
-            <span className="absolute inline-flex h-10 w-10 rounded-full bg-orange-400/40 animate-ping -top-2.5 -left-2.5" />
-            <div className="relative h-5 w-5 bg-orange-500 rounded-full shadow-lg ring-2 ring-white flex items-center justify-center">
+            <span className="absolute inline-flex h-10 w-10 rounded-full bg-brand/30 animate-ping -top-2.5 -left-2.5" />
+            <div className="relative h-5 w-5 bg-brand rounded-full shadow-lg ring-2 ring-white flex items-center justify-center">
               <div className="h-2 w-2 bg-white rounded-full" />
             </div>
           </div>
@@ -243,7 +243,7 @@ function PhoneMockup() {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              <div className="h-9 w-9 bg-orange-500 rounded-2xl flex items-center justify-center flex-shrink-0 text-base">
+              <div className="h-9 w-9 bg-brand rounded-2xl flex items-center justify-center flex-shrink-0 text-base">
                 🍔
               </div>
               <div className="min-w-0">
@@ -254,7 +254,7 @@ function PhoneMockup() {
               </div>
             </div>
             <div className="mt-3 h-1 bg-neutral-100 rounded-full overflow-hidden">
-              <div className="h-full w-[58%] bg-orange-500 rounded-full" />
+              <div className="h-full w-[58%] bg-brand rounded-full" />
             </div>
           </div>
         </div>
