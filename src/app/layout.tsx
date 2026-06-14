@@ -1,8 +1,12 @@
 import type { Metadata, Viewport } from "next"
-import { Geist } from "next/font/google"
+import { Syne } from "next/font/google"
 import "./globals.css"
 
-const geist = Geist({ subsets: ["latin"] })
+const syne = Syne({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "Rastreaí — Rastreamento de entregas próprias",
@@ -25,7 +29,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className="h-full">
-      <body className={`${geist.className} h-full antialiased`}>{children}</body>
+      <body className={`${syne.className} h-full antialiased`}>{children}</body>
     </html>
   )
 }
