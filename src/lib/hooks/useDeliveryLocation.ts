@@ -31,6 +31,9 @@ export function useDeliveryLocation(
 
     const supabase = createClient()
     let cancelado = false
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+    let tentativa = 0
 
     // Última posição conhecida no banco
     supabase
@@ -46,18 +49,70 @@ export function useDeliveryLocation(
         }
       })
 
-    // Posições ao vivo via broadcast
-    const channel = supabase
-      .channel(`rastreio:${deliveryId}`)
-      .on("broadcast", { event: "location" }, (payload) => {
-        const { lat, lng, accuracy } = payload.payload as LivePosition
-        if (!cancelado) setPosition({ lat, lng, accuracy })
-      })
-      .subscribe()
+    const limparTimer = () => {
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer)
+        reconnectTimer = null
+      }
+    }
+
+    const limparCanal = () => {
+      if (channel) {
+        supabase.removeChannel(channel)
+        channel = null
+      }
+    }
+
+    const agendarReconexao = () => {
+      if (cancelado) return
+      limparTimer()
+      const delay = Math.min(1000 * 2 ** tentativa, 10000)
+      tentativa += 1
+      reconnectTimer = setTimeout(() => {
+        if (!cancelado) subscribe()
+      }, delay)
+    }
+
+    // Posições ao vivo via broadcast, com reconexão silenciosa
+    const subscribe = () => {
+      if (cancelado) return
+      limparTimer()
+      limparCanal()
+
+      channel = supabase
+        .channel(`rastreio:${deliveryId}`)
+        .on("broadcast", { event: "location" }, (payload) => {
+          const { lat, lng, accuracy } = payload.payload as LivePosition
+          if (!cancelado) setPosition({ lat, lng, accuracy })
+        })
+        .subscribe((status) => {
+          if (cancelado) return
+          if (status === "SUBSCRIBED") {
+            tentativa = 0
+          } else if (
+            status === "CHANNEL_ERROR" ||
+            status === "TIMED_OUT" ||
+            status === "CLOSED"
+          ) {
+            agendarReconexao()
+          }
+        })
+    }
+
+    const handleOnline = () => {
+      if (cancelado) return
+      tentativa = 0
+      subscribe()
+    }
+
+    window.addEventListener("online", handleOnline)
+    subscribe()
 
     return () => {
       cancelado = true
-      supabase.removeChannel(channel)
+      window.removeEventListener("online", handleOnline)
+      limparTimer()
+      limparCanal()
     }
   }, [deliveryId, enabled])
 

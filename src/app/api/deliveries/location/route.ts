@@ -54,21 +54,14 @@ export async function POST(req: NextRequest) {
 
   const { lat, lng, accuracy } = parsed.data
 
+  // Apenas persistência. O broadcast de "location" agora é feito diretamente
+  // pelo navegador do entregador (tempo-real desacoplado da persistência).
   await admin.from("delivery_locations").insert({
     delivery_id: delivery.id,
     lat,
     lng,
     accuracy: accuracy ?? null,
   })
-
-  await admin
-    .channel(`rastreio:${delivery.id}`)
-    .send({
-      type: "broadcast",
-      event: "location",
-      payload: { lat, lng, accuracy },
-    })
-    .catch(() => null)
 
   return NextResponse.json({ ok: true })
 }

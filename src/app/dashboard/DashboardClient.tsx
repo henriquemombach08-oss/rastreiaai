@@ -30,23 +30,85 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
     if (data) setDeliveries(data)
   }, [supabase, store.id])
 
-  // Realtime: atualiza quando status de entrega muda
+  // Realtime: atualiza quando status de entrega muda, com reconexão resiliente
   useEffect(() => {
-    const channel = supabase
-      .channel(`dashboard:${store.id}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "deliveries",
-          filter: `store_id=eq.${store.id}`,
-        },
-        () => recarregar()
-      )
-      .subscribe()
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+    let tentativa = 0
+    let cancelado = false
 
-    return () => { supabase.removeChannel(channel) }
+    const limparTimer = () => {
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer)
+        reconnectTimer = null
+      }
+    }
+
+    const limparCanal = () => {
+      if (channel) {
+        supabase.removeChannel(channel)
+        channel = null
+      }
+    }
+
+    const agendarReconexao = () => {
+      if (cancelado) return
+      limparTimer()
+      const delay = Math.min(1000 * 2 ** tentativa, 10000)
+      tentativa += 1
+      reconnectTimer = setTimeout(() => {
+        if (!cancelado) subscribe()
+      }, delay)
+    }
+
+    const subscribe = () => {
+      if (cancelado) return
+      limparTimer()
+      limparCanal()
+
+      channel = supabase
+        .channel(`dashboard:${store.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "deliveries",
+            filter: `store_id=eq.${store.id}`,
+          },
+          () => recarregar()
+        )
+        .subscribe((status) => {
+          if (cancelado) return
+          if (status === "SUBSCRIBED") {
+            tentativa = 0
+            // sincroniza após reconectar, caso eventos tenham sido perdidos
+            recarregar()
+          } else if (
+            status === "CHANNEL_ERROR" ||
+            status === "TIMED_OUT" ||
+            status === "CLOSED"
+          ) {
+            agendarReconexao()
+          }
+        })
+    }
+
+    const handleOnline = () => {
+      if (cancelado) return
+      tentativa = 0
+      subscribe()
+    }
+
+    window.addEventListener("online", handleOnline)
+    subscribe()
+
+    return () => {
+      cancelado = true
+      window.removeEventListener("online", handleOnline)
+      limparTimer()
+      limparCanal()
+    }
   }, [supabase, store.id, recarregar])
 
   async function handleDispatch(id: string) {

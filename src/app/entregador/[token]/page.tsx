@@ -1,8 +1,11 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
+import type { RealtimeChannel } from "@supabase/supabase-js"
 import { MapPin, Wifi, WifiOff, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { createClient } from "@/lib/supabase/client"
+import { criarCanalEntregador, transmitirPosicao } from "@/lib/realtime"
 
 type EstadoPagina = "carregando" | "erro" | "aguardando" | "rastreando" | "concluido"
 
@@ -25,6 +28,9 @@ export default function EntregadorPage({ params }: { params: Promise<{ token: st
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
   const filaOfflineRef = useRef<Array<{ lat: number; lng: number; accuracy?: number }>>([])
   const ultimoPersistidoRef = useRef<number>(0)
+  const ultimoBroadcastRef = useRef<number>(0)
+  const channelRef = useRef<RealtimeChannel | null>(null)
+  const canalProntoRef = useRef<boolean>(false)
 
   // Resolve params (Next.js 15 — params é Promise)
   useEffect(() => {
@@ -72,6 +78,24 @@ export default function EntregadorPage({ params }: { params: Promise<{ token: st
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Limpeza ao desmontar: watch, wake lock e canal Realtime.
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current)
+        watchIdRef.current = null
+      }
+      wakeLockRef.current?.release()
+      wakeLockRef.current = null
+      if (channelRef.current) {
+        const supabase = createClient()
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+        canalProntoRef.current = false
+      }
+    }
+  }, [])
+
   const enviarFilaOffline = useCallback(async () => {
     if (!token || filaOfflineRef.current.length === 0) return
     const fila = [...filaOfflineRef.current]
@@ -95,12 +119,24 @@ export default function EntregadorPage({ params }: { params: Promise<{ token: st
       const agora = Date.now()
       const payload = { lat, lng, accuracy }
 
+      // Broadcast direto do navegador a cada ~5s (somente em tempo-real,
+      // exige canal já SUBSCRIBED e conexão ativa — não enfileira posição velha).
+      if (
+        navigator.onLine &&
+        channelRef.current &&
+        canalProntoRef.current &&
+        agora - ultimoBroadcastRef.current >= 5000
+      ) {
+        ultimoBroadcastRef.current = agora
+        transmitirPosicao(channelRef.current, payload)
+      }
+
+      // Persiste no banco a cada ~15s (usa fila offline para reenvio).
       if (!navigator.onLine) {
         filaOfflineRef.current.push(payload)
         return
       }
 
-      // Persiste no banco a cada 15 segundos
       const devePersistir = agora - ultimoPersistidoRef.current >= 15000
       if (devePersistir) {
         ultimoPersistidoRef.current = agora
@@ -123,6 +159,14 @@ export default function EntregadorPage({ params }: { params: Promise<{ token: st
       setErroMsg("Seu navegador não suporta geolocalização.")
       setEstado("erro")
       return
+    }
+
+    // Assina o canal Realtime para broadcast direto do navegador.
+    if (entrega && !channelRef.current) {
+      canalProntoRef.current = false
+      channelRef.current = criarCanalEntregador(entrega.id, () => {
+        canalProntoRef.current = true
+      })
     }
 
     // Wake Lock — mantém tela acesa
@@ -149,15 +193,24 @@ export default function EntregadorPage({ params }: { params: Promise<{ token: st
       },
       { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
     )
-  }, [enviarPosicao])
+  }, [enviarPosicao, entrega])
 
   async function concluirEntrega() {
     if (!token) return
 
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current)
+      watchIdRef.current = null
     }
     wakeLockRef.current?.release()
+    wakeLockRef.current = null
+
+    if (channelRef.current) {
+      const supabase = createClient()
+      supabase.removeChannel(channelRef.current)
+      channelRef.current = null
+      canalProntoRef.current = false
+    }
 
     try {
       await fetch(`/api/deliveries/location?token=${token}&concluir=true`, {

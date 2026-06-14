@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
-import { MapPin, Clock, CheckCircle, Loader2, AlertCircle } from "lucide-react"
+import { MapPin, Clock, CheckCircle, Loader2, AlertCircle, WifiOff } from "lucide-react"
 import { createClient } from "@/lib/supabase/client"
 import { statusLabel, tempoDecorrido } from "@/lib/utils"
 import type { DeliveryStatus } from "@/types/database"
@@ -32,6 +32,12 @@ export default function RastreioPage({ params }: { params: Promise<{ token: stri
   const [entrega, setEntrega] = useState<EntregaInfo | null>(null)
   const [posicao, setPosicao] = useState<Posicao | null>(null)
   const [erroMsg, setErroMsg] = useState<string | null>(null)
+  const [conectado, setConectado] = useState(true)
+  const [online, setOnline] = useState(true)
+
+  // estado atual acessível dentro dos callbacks do canal sem recriar a assinatura
+  const estadoRef = useRef<EstadoPagina>(estado)
+  useEffect(() => { estadoRef.current = estado }, [estado])
 
   useEffect(() => {
     params.then((p) => setToken(p.token))
@@ -65,27 +71,99 @@ export default function RastreioPage({ params }: { params: Promise<{ token: stri
       })
   }, [token])
 
-  // Realtime — escuta broadcast do canal de entrega
+  // Realtime — escuta broadcast do canal de entrega, com reconexão resiliente
+  const deliveryId = entrega?.id ?? null
   useEffect(() => {
-    if (!entrega) return
+    if (!deliveryId) return
     const supabase = createClient()
 
-    const channel = supabase
-      .channel(`rastreio:${entrega.id}`)
-      .on("broadcast", { event: "location" }, (payload) => {
-        const { lat, lng } = payload.payload as { lat: number; lng: number }
-        setPosicao({ lat, lng })
-        if (estado === "aguardando") setEstado("acompanhando")
-      })
-      .on("broadcast", { event: "status" }, (payload) => {
-        const { status } = payload.payload as { status: DeliveryStatus }
-        setEntrega((prev) => prev ? { ...prev, status } : prev)
-        if (status === "delivered") setEstado("entregue")
-      })
-      .subscribe()
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null
+    let tentativa = 0
+    let cancelado = false
 
-    return () => { supabase.removeChannel(channel) }
-  }, [entrega, estado])
+    const limparTimer = () => {
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer)
+        reconnectTimer = null
+      }
+    }
+
+    const limparCanal = () => {
+      if (channel) {
+        supabase.removeChannel(channel)
+        channel = null
+      }
+    }
+
+    const agendarReconexao = () => {
+      if (cancelado) return
+      limparTimer()
+      const delay = Math.min(1000 * 2 ** tentativa, 10000)
+      tentativa += 1
+      reconnectTimer = setTimeout(() => {
+        if (!cancelado) subscribe()
+      }, delay)
+    }
+
+    const subscribe = () => {
+      if (cancelado) return
+      limparTimer()
+      limparCanal()
+
+      channel = supabase
+        .channel(`rastreio:${deliveryId}`)
+        .on("broadcast", { event: "location" }, (payload) => {
+          const { lat, lng } = payload.payload as { lat: number; lng: number }
+          setPosicao({ lat, lng })
+          if (estadoRef.current === "aguardando") setEstado("acompanhando")
+        })
+        .on("broadcast", { event: "status" }, (payload) => {
+          const { status } = payload.payload as { status: DeliveryStatus }
+          setEntrega((prev) => prev ? { ...prev, status } : prev)
+          if (status === "delivered") setEstado("entregue")
+        })
+        .subscribe((status) => {
+          if (cancelado) return
+          if (status === "SUBSCRIBED") {
+            tentativa = 0
+            setConectado(true)
+          } else if (
+            status === "CHANNEL_ERROR" ||
+            status === "TIMED_OUT" ||
+            status === "CLOSED"
+          ) {
+            setConectado(false)
+            agendarReconexao()
+          }
+        })
+    }
+
+    const handleOnline = () => {
+      setOnline(true)
+      tentativa = 0
+      subscribe()
+    }
+
+    const handleOffline = () => {
+      setOnline(false)
+      setConectado(false)
+    }
+
+    setOnline(navigator.onLine)
+    window.addEventListener("online", handleOnline)
+    window.addEventListener("offline", handleOffline)
+
+    subscribe()
+
+    return () => {
+      cancelado = true
+      window.removeEventListener("online", handleOnline)
+      window.removeEventListener("offline", handleOffline)
+      limparTimer()
+      limparCanal()
+    }
+  }, [deliveryId])
 
   if (estado === "carregando") {
     return (
@@ -189,6 +267,22 @@ export default function RastreioPage({ params }: { params: Promise<{ token: stri
             <p className="text-xs text-neutral-400 mt-1 flex items-center gap-1">
               <Clock className="h-3 w-3" />
               Saiu {tempoDecorrido(entrega.dispatched_at)}
+            </p>
+          )}
+
+          {(!online || !conectado) && (
+            <p className="text-xs text-amber-600 mt-2 flex items-center gap-1.5">
+              {!online ? (
+                <>
+                  <WifiOff className="h-3 w-3" />
+                  Sem conexão — tentando reconectar
+                </>
+              ) : (
+                <>
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Reconectando…
+                </>
+              )}
             </p>
           )}
         </div>
