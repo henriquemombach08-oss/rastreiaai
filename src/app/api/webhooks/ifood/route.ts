@@ -1,59 +1,55 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createAdminClient } from "@/lib/supabase/admin"
-import { gerarToken } from "@/lib/tokens"
+import { validarAssinaturaWebhook } from "@/lib/ifood/webhook"
+import { processarPedidoIfood } from "@/lib/ifood/orders"
+import { IFOOD_EVENT } from "@/lib/ifood/types"
 
-// Integração iFood desativada no MVP — habilitar com IFOOD_ENABLED=true
+export const dynamic = "force-dynamic"
+
+/**
+ * Endpoint de webhook do iFood (alternativa ao polling).
+ *
+ * Recebe eventos de pedido, valida a assinatura e processa os pedidos de
+ * entrega própria. Desativado no MVP — habilitar com IFOOD_ENABLED=true.
+ *
+ * O iFood espera HTTP 2xx para confirmar o recebimento; respondemos rápido e
+ * deixamos a criação da entrega (idempotente) seguir o caminho compartilhado
+ * com o polling.
+ */
 export async function POST(req: NextRequest) {
   if (process.env.IFOOD_ENABLED !== "true") {
     return NextResponse.json({ error: "Integração iFood não habilitada" }, { status: 503 })
   }
 
-  // Valida assinatura do webhook
-  const assinatura = req.headers.get("x-ifood-signature")
   const secret = process.env.IFOOD_WEBHOOK_SECRET
+  const assinatura = req.headers.get("x-ifood-signature")
 
-  if (!assinatura || !secret) {
+  if (!secret || !assinatura) {
+    return NextResponse.json({ error: "Assinatura ausente" }, { status: 401 })
+  }
+
+  // Lê o corpo bruto ANTES de parsear — a assinatura é sobre os bytes originais.
+  const rawBody = await req.text()
+
+  if (!validarAssinaturaWebhook(rawBody, assinatura, secret)) {
     return NextResponse.json({ error: "Assinatura inválida" }, { status: 401 })
   }
 
-  const body = await req.text()
-
-  // TODO: validar HMAC-SHA256 da assinatura iFood quando a documentação estiver disponível
-  // const hmac = crypto.createHmac("sha256", secret).update(body).digest("hex")
-  // if (hmac !== assinatura) return NextResponse.json({ error: "Assinatura inválida" }, { status: 401 })
-
-  let evento: { eventType?: string; orderId?: string; merchantId?: string; order?: { deliveryMethod?: string; customer?: { name?: string }; deliveryAddress?: { formattedAddress?: string } } }
+  let evento: { fullCode?: string; code?: string; orderId?: string; merchantId?: string }
   try {
-    evento = JSON.parse(body)
+    evento = JSON.parse(rawBody)
   } catch {
     return NextResponse.json({ error: "Body inválido" }, { status: 400 })
   }
 
-  // Processa apenas pedidos com entrega própria (MERCHANT)
-  if (
-    evento.eventType === "PLACED" &&
-    evento.order?.deliveryMethod === "MERCHANT"
-  ) {
-    const admin = createAdminClient()
-
-    const { data: store } = await admin
-      .from("stores")
-      .select("id")
-      .eq("ifood_merchant_id", evento.merchantId ?? "")
-      .single()
-
-    if (store) {
-      await admin.from("deliveries").insert({
-        store_id: store.id,
-        ifood_order_id: evento.orderId ?? null,
-        customer_name: evento.order?.customer?.name ?? "Cliente iFood",
-        customer_address: evento.order?.deliveryAddress?.formattedAddress ?? "Endereço não informado",
-        courier_token: gerarToken(),
-        customer_token: gerarToken(),
-      })
+  const codigo = evento.fullCode ?? evento.code
+  if (codigo === IFOOD_EVENT.PLACED && evento.orderId) {
+    try {
+      await processarPedidoIfood(evento.orderId, evento.merchantId)
+    } catch {
+      // Erro no processamento não deve impedir o ack ao iFood; o polling
+      // (se ativo) ou um reenvio do webhook tenta novamente depois.
     }
   }
 
-  // iFood exige 200 para confirmar recebimento (acknowledgment)
   return NextResponse.json({ received: true })
 }
