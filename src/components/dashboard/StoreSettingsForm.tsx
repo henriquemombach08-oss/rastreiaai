@@ -57,7 +57,7 @@ export function StoreSettingsForm({ store, email }: StoreSettingsFormProps) {
               <Label htmlFor="name">Nome da loja</Label>
               <Input id="name" {...register("name")} />
               {errors.name && (
-                <p className="text-xs text-red-600">{errors.name.message}</p>
+                <p className="text-xs text-red-400">{errors.name.message}</p>
               )}
             </div>
 
@@ -74,7 +74,7 @@ export function StoreSettingsForm({ store, email }: StoreSettingsFormProps) {
               {mensagem && (
                 <span
                   className={`text-sm ${
-                    mensagem.tipo === "ok" ? "text-green-600" : "text-red-600"
+                    mensagem.tipo === "ok" ? "text-green-400" : "text-red-400"
                   }`}
                 >
                   {mensagem.texto}

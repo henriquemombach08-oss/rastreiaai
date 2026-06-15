@@ -70,11 +70,11 @@ export function DeliveryCard({ delivery, onDispatch, onComplete }: DeliveryCardP
                 {statusLabel(delivery.status)}
               </span>
             </div>
-            <div className="flex items-start gap-2 text-sm text-neutral-500">
+            <div className="flex items-start gap-2 text-sm text-white/50">
               <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
               <span className="truncate">{delivery.customer_address}</span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-neutral-400 mt-1">
+            <div className="flex items-center gap-2 text-xs text-white/35 mt-1">
               <Clock className="h-3 w-3" />
               <span>{tempoDecorrido(delivery.created_at)}</span>
             </div>
@@ -91,7 +91,7 @@ export function DeliveryCard({ delivery, onDispatch, onComplete }: DeliveryCardP
         </div>
 
         {expanded && (
-          <div className="mt-4 space-y-3 border-t pt-4">
+          <div className="mt-4 space-y-3 border-t border-white/[0.06] pt-4">
             {/* Links */}
             <div className="space-y-2">
               <LinkRow
@@ -113,10 +113,10 @@ export function DeliveryCard({ delivery, onDispatch, onComplete }: DeliveryCardP
               <div className="relative h-48 rounded-lg overflow-hidden border">
                 <DeliveryMap position={livePosition} className="h-full w-full" />
                 {!livePosition && (
-                  <div className="absolute inset-0 z-[500] flex items-center justify-center bg-white/80 pointer-events-none">
+                  <div className="absolute inset-0 z-[500] flex items-center justify-center bg-black/60 pointer-events-none">
                     <div className="text-center">
-                      <Loader2 className="h-5 w-5 animate-spin text-neutral-400 mx-auto mb-1" />
-                      <p className="text-xs text-neutral-500">Aguardando posição do entregador...</p>
+                      <Loader2 className="h-5 w-5 animate-spin text-white/40 mx-auto mb-1" />
+                      <p className="text-xs text-white/50">Aguardando posição do entregador...</p>
                     </div>
                   </div>
                 )}
@@ -164,12 +164,12 @@ function LinkRow({ label, url, copied, onCopy }: {
 }) {
   return (
     <div className="flex items-center gap-2">
-      <span className="text-xs font-medium text-neutral-500 w-20 shrink-0">{label}:</span>
-      <code className="flex-1 text-xs bg-neutral-50 border rounded px-2 py-1 truncate text-neutral-600">
+      <span className="text-xs font-medium text-white/45 w-20 shrink-0">{label}:</span>
+      <code className="flex-1 text-xs bg-white/[0.04] border border-white/[0.08] rounded px-2 py-1 truncate text-white/60">
         {url}
       </code>
       <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" onClick={onCopy}>
-        {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+        {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
       </Button>
     </div>
   )

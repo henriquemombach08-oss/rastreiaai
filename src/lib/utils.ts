@@ -19,11 +19,11 @@ export function statusLabel(status: DeliveryStatus): string {
 
 export function statusColor(status: DeliveryStatus): string {
   const colors: Record<DeliveryStatus, string> = {
-    pending: "bg-yellow-100 text-yellow-800",
-    dispatched: "bg-blue-100 text-blue-800",
-    nearby: "bg-orange-100 text-orange-800",
-    delivered: "bg-green-100 text-green-800",
-    canceled: "bg-red-100 text-red-800",
+    pending: "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20",
+    dispatched: "bg-blue-500/15 text-blue-400 border border-blue-500/20",
+    nearby: "bg-orange-500/15 text-orange-400 border border-orange-500/20",
+    delivered: "bg-green-500/15 text-green-400 border border-green-500/20",
+    canceled: "bg-red-500/15 text-red-400 border border-red-500/20",
   }
   return colors[status]
 }

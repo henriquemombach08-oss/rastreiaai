@@ -10,19 +10,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!user) redirect("/login")
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex flex-col">
-      <header className="bg-white border-b border-neutral-200 sticky top-0 z-40">
+    <div className="min-h-screen bg-[#090909] text-white flex flex-col">
+      <header className="bg-[#090909]/80 backdrop-blur-md border-b border-white/[0.06] sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="bg-brand rounded-lg p-1.5">
               <MapPin className="h-4 w-4 text-white" />
             </div>
-            <span className="font-black tracking-tight">Rastreaí</span>
+            <span className="font-black tracking-tight text-white">Rastreaí</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link
               href="/dashboard/configuracoes"
-              className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+              className="flex items-center gap-1.5 text-sm text-white/45 hover:text-white transition-colors"
             >
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline">Configurações</span>
@@ -30,7 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             <form action="/api/auth/logout" method="POST">
               <button
                 type="submit"
-                className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+                className="flex items-center gap-1.5 text-sm text-white/45 hover:text-white transition-colors"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="hidden sm:inline">Sair</span>

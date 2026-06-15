@@ -30,28 +30,26 @@ export function DeliveryLinks({ courierToken, customerToken }: DeliveryLinksProp
   }
 
   return (
-    <Card className="border-green-200 bg-green-50">
+    <Card className="border-green-500/20 bg-green-500/10">
       <CardHeader className="pb-3">
-        <CardTitle className="text-green-800 text-base">Entrega criada com sucesso!</CardTitle>
+        <CardTitle className="text-green-400 text-base">Entrega criada com sucesso!</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <LinkItem
           label="Link do Entregador"
           url={courierUrl}
-          icon={<Truck className="h-4 w-4" />}
+          icon={<Truck className="h-4 w-4 text-white/60" />}
           copied={copiedCourier}
           onCopy={() => copiar(courierUrl, "courier")}
-          colorClass="bg-blue-50 border-blue-200"
         />
         <LinkItem
           label="Link do Cliente"
           url={customerUrl}
-          icon={<Eye className="h-4 w-4" />}
+          icon={<Eye className="h-4 w-4 text-white/60" />}
           copied={copiedCustomer}
           onCopy={() => copiar(customerUrl, "customer")}
-          colorClass="bg-purple-50 border-purple-200"
         />
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-white/40">
           Envie o link do cliente via WhatsApp. O link do entregador deve ser aberto no celular do motoboy.
         </p>
       </CardContent>
@@ -65,23 +63,21 @@ function LinkItem({
   icon,
   copied,
   onCopy,
-  colorClass,
 }: {
   label: string
   url: string
   icon: React.ReactNode
   copied: boolean
   onCopy: () => void
-  colorClass: string
 }) {
   return (
-    <div className={`rounded-lg border p-3 ${colorClass}`}>
+    <div className="rounded-lg border border-white/[0.08] bg-white/[0.04] p-3">
       <div className="flex items-center gap-2 mb-2">
         {icon}
-        <span className="text-xs font-semibold text-neutral-600">{label}</span>
+        <span className="text-xs font-semibold text-white/60">{label}</span>
       </div>
       <div className="flex items-center gap-2">
-        <code className="flex-1 text-xs bg-white rounded px-2 py-1.5 border truncate text-neutral-700">
+        <code className="flex-1 text-xs bg-white/[0.04] rounded px-2 py-1.5 border border-white/[0.08] truncate text-white/60">
           {url}
         </code>
         <Button
@@ -90,7 +86,7 @@ function LinkItem({
           onClick={onCopy}
           className="shrink-0 gap-1"
         >
-          {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? "Copiado!" : "Copiar"}
         </Button>
       </div>

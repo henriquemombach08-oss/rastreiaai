@@ -160,14 +160,14 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
     <div className="space-y-6">
       {/* Banner de configuração inicial */}
       {isFirstSetup && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-3">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 space-y-3">
           <div className="flex items-center gap-2">
-            <Pencil className="h-4 w-4 text-amber-700" />
-            <p className="text-sm font-medium text-amber-800">
+            <Pencil className="h-4 w-4 text-amber-400" />
+            <p className="text-sm font-medium text-amber-300">
               Qual é o nome da sua loja?
             </p>
           </div>
-          <p className="text-xs text-amber-700">
+          <p className="text-xs text-amber-400/70">
             Ele aparece no link de rastreamento que o cliente vê.
           </p>
           <div className="flex gap-2">
@@ -176,7 +176,7 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
               onChange={(e) => setNomeEdit(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && salvarNomeRapido()}
               placeholder="Ex: Hambúrguer do Bairro"
-              className="flex-1 h-9 text-sm bg-white"
+              className="flex-1 h-9 text-sm"
             />
             <Button
               size="sm"
@@ -192,8 +192,8 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold">{storeName}</h1>
-          <p className="text-sm text-neutral-500">
+          <h1 className="text-xl font-bold text-white">{storeName}</h1>
+          <p className="text-sm text-white/45">
             {ativas.length} entrega{ativas.length !== 1 ? "s" : ""} ativa{ativas.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -212,17 +212,17 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
       )}
 
       {/* Abas */}
-      <div className="flex gap-1 bg-neutral-100 rounded-lg p-1 w-fit">
+      <div className="flex gap-1 bg-white/[0.04] rounded-lg p-1 w-fit">
         <button
           onClick={() => setAba("ativas")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-            aba === "ativas" ? "bg-white shadow-sm text-neutral-900" : "text-neutral-500 hover:text-neutral-700"
+            aba === "ativas" ? "bg-white/[0.08] text-white" : "text-white/45 hover:text-white/70"
           }`}
         >
           <Package className="h-4 w-4" />
           Ativas
           {ativas.length > 0 && (
-            <span className="bg-neutral-900 text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
+            <span className="bg-brand text-white text-xs rounded-full px-1.5 py-0.5 min-w-[20px] text-center">
               {ativas.length}
             </span>
           )}
@@ -230,7 +230,7 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
         <button
           onClick={() => setAba("historico")}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-            aba === "historico" ? "bg-white shadow-sm text-neutral-900" : "text-neutral-500 hover:text-neutral-700"
+            aba === "historico" ? "bg-white/[0.08] text-white" : "text-white/45 hover:text-white/70"
           }`}
         >
           <History className="h-4 w-4" />
@@ -243,7 +243,7 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
         <div className="space-y-3">
           {ativas.length === 0 ? (
             <Card>
-              <CardContent className="py-12 text-center text-neutral-400">
+              <CardContent className="py-12 text-center text-white/30">
                 <Package className="h-10 w-10 mx-auto mb-3 opacity-30" />
                 <p>Nenhuma entrega ativa</p>
                 <p className="text-sm">Clique em "Nova entrega" para começar</p>
@@ -266,7 +266,7 @@ export function DashboardClient({ store, initialDeliveries }: DashboardClientPro
         <div className="space-y-3">
           {historico.length === 0 ? (
             <Card>
-              <CardContent className="py-12 text-center text-neutral-400">
+              <CardContent className="py-12 text-center text-white/30">
                 <History className="h-10 w-10 mx-auto mb-3 opacity-30" />
                 <p>Nenhuma entrega no histórico</p>
               </CardContent>

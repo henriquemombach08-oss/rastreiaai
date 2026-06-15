@@ -84,7 +84,7 @@ export function NewDeliveryForm({ storeId, onSuccess }: NovaEntregaFormProps) {
               {...form.register("customer_name")}
             />
             {form.formState.errors.customer_name && (
-              <p className="text-xs text-red-600">
+              <p className="text-xs text-red-400">
                 {form.formState.errors.customer_name.message}
               </p>
             )}
@@ -98,14 +98,14 @@ export function NewDeliveryForm({ storeId, onSuccess }: NovaEntregaFormProps) {
               {...form.register("customer_address")}
             />
             {form.formState.errors.customer_address && (
-              <p className="text-xs text-red-600">
+              <p className="text-xs text-red-400">
                 {form.formState.errors.customer_address.message}
               </p>
             )}
           </div>
 
           {erro && (
-            <p className="text-sm text-red-600 bg-red-50 rounded p-2">{erro}</p>
+            <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded p-2">{erro}</p>
           )}
 
           <Button
