@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { DeliveryLinks } from "@/components/dashboard/DeliveryLinks"
+import { AddressSearch } from "@/components/dashboard/AddressSearch"
 import { novaEntregaSchema, type NovaEntregaInput } from "@/lib/validations"
 
 interface NovaEntregaFormProps {
@@ -92,10 +93,12 @@ export function NewDeliveryForm({ storeId, onSuccess }: NovaEntregaFormProps) {
 
           <div className="space-y-1.5">
             <Label htmlFor="customer_address">Endereço de entrega</Label>
-            <Input
-              id="customer_address"
-              placeholder="Ex: Rua das Flores, 123 - Jardins"
-              {...form.register("customer_address")}
+            <AddressSearch
+              value={form.watch("customer_address")}
+              onChange={(v) => form.setValue("customer_address", v, { shouldValidate: true })}
+              onSelect={(result) =>
+                form.setValue("customer_address", result.displayName, { shouldValidate: true })
+              }
             />
             {form.formState.errors.customer_address && (
               <p className="text-xs text-red-400">
