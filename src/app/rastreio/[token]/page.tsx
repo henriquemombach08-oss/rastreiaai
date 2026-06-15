@@ -111,7 +111,11 @@ export default function RastreioPage({ params }: { params: Promise<{ token: stri
       limparTimer()
       limparCanal()
 
-      channel = supabase
+      // Captura referência local para ignorar callbacks de canais antigos
+      // que disparam CLOSED quando removidos voluntariamente no reconnect
+      let thisChannel: ReturnType<typeof supabase.channel>
+
+      thisChannel = supabase
         .channel(`rastreio:${deliveryId}`)
         .on("broadcast", { event: "location" }, (payload) => {
           const { lat, lng } = payload.payload as { lat: number; lng: number }
@@ -125,6 +129,7 @@ export default function RastreioPage({ params }: { params: Promise<{ token: stri
         })
         .subscribe((status) => {
           if (cancelado) return
+          if (channel !== thisChannel) return // callback de canal antigo, ignora
           if (status === "SUBSCRIBED") {
             tentativa = 0
             setConectado(true)
@@ -137,6 +142,8 @@ export default function RastreioPage({ params }: { params: Promise<{ token: stri
             agendarReconexao()
           }
         })
+
+      channel = thisChannel
     }
 
     const handleOnline = () => {

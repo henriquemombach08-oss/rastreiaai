@@ -50,8 +50,15 @@ export default function DeliveryMap({ position, className }: DeliveryMapProps) {
         maxZoom: tiles.maxZoom,
       }).addTo(map)
 
+      const motoIcon = L.divIcon({
+        className: "",
+        html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))">🏍️</div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      })
+
       if (position) {
-        marker = L.marker([position.lat, position.lng]).addTo(map)
+        marker = L.marker([position.lat, position.lng], { icon: motoIcon }).addTo(map)
         markerRef.current = marker
       }
 
@@ -81,7 +88,13 @@ export default function DeliveryMap({ position, className }: DeliveryMapProps) {
         map.panTo(newLatLng, { animate: true, duration: 0.8 })
       } else {
         // Primeira posição: cria o marcador e dá zoom no entregador
-        markerRef.current = L.marker(newLatLng).addTo(map)
+        const motoIcon = L.divIcon({
+          className: "",
+          html: `<div style="font-size:28px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.4))">🏍️</div>`,
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
+        })
+        markerRef.current = L.marker(newLatLng, { icon: motoIcon }).addTo(map)
         map.setView(newLatLng, 16, { animate: true })
       }
     }
