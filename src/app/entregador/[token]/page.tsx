@@ -119,13 +119,13 @@ export default function EntregadorPage({ params }: { params: Promise<{ token: st
       const agora = Date.now()
       const payload = { lat, lng, accuracy }
 
-      // Broadcast direto do navegador a cada ~5s (somente em tempo-real,
+      // Broadcast direto do navegador a cada ~1s (somente em tempo-real,
       // exige canal já SUBSCRIBED e conexão ativa — não enfileira posição velha).
       if (
         navigator.onLine &&
         channelRef.current &&
         canalProntoRef.current &&
-        agora - ultimoBroadcastRef.current >= 5000
+        agora - ultimoBroadcastRef.current >= 1000
       ) {
         ultimoBroadcastRef.current = agora
         transmitirPosicao(channelRef.current, payload)
